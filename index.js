@@ -16,6 +16,7 @@ const httpMethodToFunc = {
     "GET" : (pathname) => getMethodUrls[pathname] ,
     "DELETE": (pathname) => deleteMethodUrls[pathname],
     "PUT":() => console.log("Update not Implemented")  ,
+    "OPTIONS": () => handleOptions
 }
 
 const postMethodUrls = {
@@ -36,6 +37,7 @@ const host = "localhost"
 http.createServer({}, (req, res) => {
 
     pathname = new URL(req.url, `http://${req.headers.host}`).pathname
+    console.log(req.method)
     urlToFunc = httpMethodToFunc[req.method](pathname)
     
     if(urlToFunc !== undefined) {
@@ -55,7 +57,7 @@ function addUser(req,res) {
         const user_data = JSON.parse(buffer)
         users.push(user_data)
         console.log(users)
-        res.end("Added User")
+        handleOptions(req,res)
     })
 }
 
@@ -63,12 +65,7 @@ function deleteUser(req,res) {
     key = new URL(req.url, `http://${host}:${port}`).searchParams.get('key')
     users = users.filter( user => user.key !== key )
     console.log(users)
-    res.end("Deleted Key")
-}
-
-const token = {
-    key: "2447266872-MoM32UnFElY9vRAn5ySbB2nIlV6jCwlPsR8vPIT", 
-    secret : "TvBhQ8Olz3QgVkoSIWkOm3pf6jXnOzkUhxJ5QDJczquUQ"
+    handleOptions(req,res)
 }
 
 const oauth = OAuth({
@@ -93,20 +90,33 @@ function getTweets(req,res) {
     users.map((user)=>{
         accessToken = user.accessToken
         console.log(user)
-        secret = user.secret
+        secret = user.secret 
         axios.get(request.url, {
             headers : oauth.toHeader(oauth.authorize(request,user))
         }).then((result)=> {
             res.writeHead(200,{
-                'Content-Type' : 'application/json' 
+                'Content-Type' : 'application/json' ,
+                'Allow' : 'OPTIONS,POST,GET,HEAD,DELETE',
+                'Access-Control-Allow-Origin' : req.headers.origin,
+                'Access-Control-Allow-Methods' : '*',
+                'Access-Control-Allow-Headers' : '*'
             })
             console.log(result)
-            result.data.map((tweet) => {
-                res.write(JSON.stringify(tweet))
-            })
-            res.end()
+            res.write(JSON.stringify(result.data))
+            res.end() 
         }).catch((error) => {
-            res.end(error.toString())
+            handleOptions(req,res)
         })
     })
+}
+
+function handleOptions(req,res) {
+    console.log(req.headers.origin)
+    res.writeHead(200,{
+        'Allow' : 'OPTIONS,POST,GET,HEAD,DELETE',
+        'Access-Control-Allow-Origin' : req.headers.origin,
+        'Access-Control-Allow-Methods' : '*',
+        'Access-Control-Allow-Headers' : '*'
+    })
+    res.end()
 }
