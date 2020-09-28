@@ -1,6 +1,7 @@
 const { StringDecoder } = require('string_decoder')
 const decoder = new StringDecoder('utf-8')
-const { host,port,users,handleOptions } = require('./utils')
+const { host,port,handleOptions,deleteUserByKey } = require('./utils')
+let { users } = require('./utils.js')
 
 
 
@@ -19,7 +20,7 @@ module.exports.addUser = (req,res) => {
 
 module.exports.deleteUser = (req,res) => {
     key = new URL(req.url, `http://${host}:${port}`).searchParams.get('key')
-    users = users.filter( user => user.key !== key )
+    users = users.filter(user => user.key !== key) 
     console.log(users)
     handleOptions(req,res)
     

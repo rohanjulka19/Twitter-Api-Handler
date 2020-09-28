@@ -1,10 +1,10 @@
-module.exports.handleOptions = (req,res) => {
-    console.log(req.headers.origin )
-    res.writeHead(200,{
-        'Allow' : 'OPTIONS,POST,GET,HEAD,DELETE',
-        'Access-Control-Allow-Origin' : req.headers.origin,
-        'Access-Control-Allow-Methods' : '*',
-        'Access-Control-Allow-Headers' : '*'
+module.exports.handleOptions = (req, res) => {
+    console.log(req.headers.origin)
+    res.writeHead(200, {
+        'Allow': 'OPTIONS,POST,GET,HEAD,DELETE',
+        'Access-Control-Allow-Origin': req.headers.origin,
+        'Access-Control-Allow-Methods': '*',
+        'Access-Control-Allow-Headers': '*'
     })
     res.end()
 }
@@ -20,8 +20,16 @@ module.exports.getDateTime = (date_time) => {
 
 // Find a better place for them 
 
-let users = []
+let users = [{
+    key: '2447266872-YfLJt8Uc222aKr1UHe6AIepBbJiAtL63C4nV0by',
+    secret: 'byWNd6CQZEIIfNlN1ktb1wGuWQOwJQqlfgHFjZ9qRlexu'
+},
+{
+    key: '1310590545362694144-xw608j935p8GyPGbyzv8cmwQ5g5kmh',
+    secret: 'ryLSiYAkLLWDQZbiJs4Ma32xv1cSKkQjc8gTEgCJVpdBB'
+}
+]
 
-module.exports.port = 8000 ; 
+module.exports.port = 8000;
 module.exports.host = "localhost"
 module.exports.users = users

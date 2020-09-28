@@ -1,63 +1,135 @@
 const crypto = require('crypto')
 const OAuth = require('oauth-1.0a')
 const axios = require('axios')
-const {host,port,users,handleOptions , getDateTime} = require('./utils')
+const { host, port, users, handleOptions, getDateTime } = require('./utils')
 
-let last_tweet_id = 0n ;
+let last_tweet_id = 0n;
 
 const request = {
     url: `https://api.twitter.com/1.1/statuses/home_timeline.json?tweet_mode=extended`,
     method: 'get',
 }
 
+module.exports.getTweetsFromAllAccounts = (req, res) => {
+    /*let user_tweets = users.map(user => {
+        return {
+            key: user.key,
+            tweets: this.getTweets(user)
+        }
+    })
+    console.log("User Tweet Data")
+    console.log(user_tweets)*/
 
-module.exports.getTweets = (req,res) => {
+    let getAllTweetsPromiseArray = [];
+    let tweetsFromAllAccounts = [];
+
+    users.map((user) => {
+        getAllTweetsPromiseArray.push(this.getTweets(user))
+    })
+
+    Promise.all(getAllTweetsPromiseArray)
+        .then((results) => {
+            results.map((result, index) => {
+                tweetsFromAllAccounts = [...tweetsFromAllAccounts, {
+                    key: users[index].key,
+                    tweets: getReducedTweets(result)
+                }]
+            })
+            console.log("tweets")
+            console.log(tweetsFromAllAccounts)
+        })
+    /*res.write(JSON.stringify(tweets))
+    res.writeHead(200, {
+        'Content-Type': 'application/json',
+        'Allow': 'OPTIONS,POST,GET,HEAD,DELETE',
+        'Access-Control-Allow-Origin': req.headers.origin,
+        'Access-Control-Allow-Methods': '*',
+        'Access-Control-Allow-Headers': '*'
+    })
+    res.end()*/
+}
+
+module.exports.getTweets = (user) => {
+    console.log("geting tweets");
+    accessToken = user.accessToken
+    console.log(user)
+    secret = user.secret
+    let getTweetsRequest = axios.get(request.url, {
+        headers: oauth.toHeader(oauth.authorize(request, user)),
+    })
+    return getTweetsRequest;
+}
+
+function getReducedTweets(result) {
+    let reducedTwitterData = [];
+    result.data.map((tweetData) => {
+        let tweet_id = BigInt(tweetData.id);
+        last_tweet_id = (tweet_id > last_tweet_id ? tweet_id : last_tweet_id);
+        reducedTwitterData = [...reducedTwitterData, {
+            text: tweetData.full_text,
+            id: tweetData.id,
+            created_at: getDateTime(tweetData.created_at),
+            user: {
+                name: tweetData.user.name,
+                screen_name: tweetData.user.screen_name,
+                url: tweetData.user.url,
+                profile_image_url: tweetData.user.profile_image_url,
+                verified: tweetData.user.verified
+            }
+        }]
+    })
+    return reducedTwitterData
+}
+/*module.exports.getTweets = (user) => {
     console.log("getting tweets")
-    users.map((user)=>{
+    //users.map((user) => {
         accessToken = user.accessToken
         console.log(user)
-        secret = user.secret 
-        axios.get(request.url, {
-            headers : oauth.toHeader(oauth.authorize(request,user)),
-        }).then((result)=> {
-            res.writeHead(200,{
-                'Content-Type' : 'application/json' ,
-                'Allow' : 'OPTIONS,POST,GET,HEAD,DELETE',
-                'Access-Control-Allow-Origin' : req.headers.origin,
-                'Access-Control-Allow-Methods' : '*',
-                'Access-Control-Allow-Headers' : '*'
+        secret = user.secret
+        let reducedTwitterData = axios.get(request.url, {
+            headers: oauth.toHeader(oauth.authorize(request, user)),
+        }).then((result) => {
+            /*res.writeHead(200, {
+                'Content-Type': 'application/json',
+                'Allow': 'OPTIONS,POST,GET,HEAD,DELETE',
+                'Access-Control-Allow-Origin': req.headers.origin,
+                'Access-Control-Allow-Methods': '*',
+                'Access-Control-Allow-Headers': '*'
             })
             //console.log(result)
             let reducedTwitterData = [];
             result.data.map((tweetData) => {
                 let tweet_id = BigInt(tweetData.id);
-                last_tweet_id = ( tweet_id > last_tweet_id ? tweet_id : last_tweet_id) ; 
-                reducedTwitterData = [...reducedTwitterData,{
-                    text : tweetData.full_text , 
-                    id : tweetData.id ,
-                    created_at : getDateTime(tweetData.created_at) ,
-                    user : {
-                        name : tweetData.user.name,
+                last_tweet_id = (tweet_id > last_tweet_id ? tweet_id : last_tweet_id);
+                reducedTwitterData = [...reducedTwitterData, {
+                    text: tweetData.full_text,
+                    id: tweetData.id,
+                    created_at: getDateTime(tweetData.created_at),
+                    user: {
+                        name: tweetData.user.name,
                         screen_name: tweetData.user.screen_name,
                         url: tweetData.user.url,
-                        profile_image_url: tweetData.user.profile_image_url ,
+                        profile_image_url: tweetData.user.profile_image_url,
                         verified: tweetData.user.verified
                     }
                 }]
             })
             //The below line only needs to be addded after the first call to twitter api 
-            request.url.concat(`&since_id=${ last_tweet_id.toString()}`)  
-            console.log(last_tweet_id)
-            console.log(reducedTwitterData)
-            res.write(JSON.stringify(reducedTwitterData))
-            res.end() 
+           // request.url.concat(`&since_id=${last_tweet_id.toString()}`) 
+     //       console.log(user)
+       //     console.log(last_tweet_id)
+         //   console.log(reducedTwitterData)
+    /*        res.write(JSON.stringify(reducedTwitterData))
+            res.end()
+            return reducedTwitterData 
         }).catch((error) => {
             console.log(error);
-            handleOptions(req,res)
+            //handleOptions(req, res)
             //res.end(error.toString())
         })
-    })
-}
+    //})
+    return reducedTwitterData 
+}*/
 
 oauth = OAuth({
     consumer: { key: "L9ecKX1gF1zti6iLYUltnMjPJ", secret: "ux6E5MV0x7FSZzjQRTFVgT6KG3bez3lKOOHOgpTUGfXLBd7mAG" },

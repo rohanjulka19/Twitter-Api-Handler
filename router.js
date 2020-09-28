@@ -1,5 +1,5 @@
 const {addUser,deleteUser} = require('./user')
-const {getTweets} = require('./tweets')
+const { getTweetsFromAllAccounts } = require('./tweets')
 const { handleOptions } = require('./utils')
 
 const postMethodUrls = {
@@ -7,7 +7,7 @@ const postMethodUrls = {
 }
 
 const getMethodUrls = {
-    "/tweets": getTweets
+    "/tweets": getTweetsFromAllAccounts
 }
 
 const deleteMethodUrls = {
