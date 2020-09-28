@@ -1,15 +1,10 @@
 const crypto = require('crypto')
 const OAuth = require('oauth-1.0a')
 const axios = require('axios')
-const { host, port, users, handleOptions, getDateTime } = require('./utils')
+const { users, handleOptions, getDateTime } = require('./utils')
 
 const requestMethod = 'get'
 const requestUrl = 'https://api.twitter.com/1.1/statuses/home_timeline.json?tweet_mode=extended'
-
-/*const request = {
-    url: `https://api.twitter.com/1.1/statuses/home_timeline.json?tweet_mode=extended`,
-    method: 'get',
-}*/
 
 module.exports.getTweetsFromAllAccounts = (req, res) => {
     let getAllTweetsPromiseArray = [];
@@ -25,20 +20,13 @@ module.exports.getTweetsFromAllAccounts = (req, res) => {
                     key: users[index].key,
                     tweets: reducedTwitterData
                 }]
-                users[index].last_tweet_id = getLastTweetId(reducedTwitterData)               
+                users[index].last_tweet_id = getLastTweetId(reducedTwitterData)
             })
             console.log("tweets")
             console.log(tweetsFromAllAccounts)
             res.write(JSON.stringify(tweetsFromAllAccounts))
-            res.end()
+            handleOptions();
         })
-    /*res.writeHead(200, {
-        'Content-Type': 'application/json',
-        'Allow': 'OPTIONS,POST,GET,HEAD,DELETE',
-        'Access-Control-Allow-Origin': req.headers.origin,
-        'Access-Control-Allow-Methods': '*',
-        'Access-Control-Allow-Headers': '*'
-    })*/
 }
 
 function getTweets(user) {
@@ -56,13 +44,13 @@ function getTweets(user) {
 
 function getRequestObject(user) {
 
-    let requestObject = {} 
+    let requestObject = {}
     requestObject.method = requestMethod
-    requestObject.url = requestUrl 
-    if(user.hasOwnProperty('last_tweet_id')) {
-        requestObject.url = `${requestUrl}&since_id=${user.last_tweet_id.toString()}` 
-    } 
-    return requestObject 
+    requestObject.url = requestUrl
+    if (user.hasOwnProperty('last_tweet_id')) {
+        requestObject.url = `${requestUrl}&since_id=${user.last_tweet_id.toString()}`
+    }
+    return requestObject
 }
 
 function getReducedTweets(result) {
@@ -86,62 +74,12 @@ function getReducedTweets(result) {
 
 function getLastTweetId(reducedTwitterData) {
     //Init last_tweet_id with first tweet id in reducedTwitterData array
-    let last_tweet_id = BigInt(reducedTwitterData[0].id); 
-    reducedTwitterData.map((tweet)=>{
+    let last_tweet_id = BigInt(reducedTwitterData[0].id);
+    reducedTwitterData.map((tweet) => {
         last_tweet_id = (tweet.id > last_tweet_id ? tweet.id : last_tweet_id);
     })
     return last_tweet_id
 }
-/*module.exports.getTweets = (user) => {
-    console.log("getting tweets")
-    //users.map((user) => {
-        accessToken = user.accessToken
-        console.log(user)
-        secret = user.secret
-        let reducedTwitterData = axios.get(request.url, {
-            headers: oauth.toHeader(oauth.authorize(request, user)),
-        }).then((result) => {
-            /*res.writeHead(200, {
-                'Content-Type': 'application/json',
-                'Allow': 'OPTIONS,POST,GET,HEAD,DELETE',
-                'Access-Control-Allow-Origin': req.headers.origin,
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Headers': '*'
-            })
-            //console.log(result)
-            let reducedTwitterData = [];
-            result.data.map((tweetData) => {
-                let tweet_id = BigInt(tweetData.id);
-                last_tweet_id = (tweet_id > last_tweet_id ? tweet_id : last_tweet_id);
-                reducedTwitterData = [...reducedTwitterData, {
-                    text: tweetData.full_text,
-                    id: tweetData.id,
-                    created_at: getDateTime(tweetData.created_at),
-                    user: {
-                        name: tweetData.user.name,
-                        screen_name: tweetData.user.screen_name,
-                        url: tweetData.user.url,
-                        profile_image_url: tweetData.user.profile_image_url,
-                        verified: tweetData.user.verified
-                    }
-                }]
-            })
-            //The below line only needs to be addded after the first call to twitter api 
-           // request.url.concat(`&since_id=${last_tweet_id.toString()}`) 
-     //       console.log(user)
-       //     console.log(last_tweet_id)
-         //   console.log(reducedTwitterData)
-    /*        res.write(JSON.stringify(reducedTwitterData))
-            res.end()
-            return reducedTwitterData 
-        }).catch((error) => {
-            console.log(error);
-            //handleOptions(req, res)
-            //res.end(error.toString())
-        })
-    //})
-    return reducedTwitterData 
-}*/
 
 oauth = OAuth({
     consumer: { key: "L9ecKX1gF1zti6iLYUltnMjPJ", secret: "ux6E5MV0x7FSZzjQRTFVgT6KG3bez3lKOOHOgpTUGfXLBd7mAG" },

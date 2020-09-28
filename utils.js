@@ -1,6 +1,10 @@
 module.exports.handleOptions = (req, res) => {
     console.log(req.headers.origin)
     res.writeHead(200, {
+    /*  We can only call writeHead one time. 
+        So in get Tweets api we have to set content type 
+        To JSON so that the browser parses it in JSON format */
+        'Content-Type': 'application/json', 
         'Allow': 'OPTIONS,POST,GET,HEAD,DELETE',
         'Access-Control-Allow-Origin': req.headers.origin,
         'Access-Control-Allow-Methods': '*',
