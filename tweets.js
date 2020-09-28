@@ -3,54 +3,48 @@ const OAuth = require('oauth-1.0a')
 const axios = require('axios')
 const { host, port, users, handleOptions, getDateTime } = require('./utils')
 
-let last_tweet_id = 0n;
+const requestMethod = 'get'
+const requestUrl = 'https://api.twitter.com/1.1/statuses/home_timeline.json?tweet_mode=extended'
 
-const request = {
+/*const request = {
     url: `https://api.twitter.com/1.1/statuses/home_timeline.json?tweet_mode=extended`,
     method: 'get',
-}
+}*/
 
 module.exports.getTweetsFromAllAccounts = (req, res) => {
-    /*let user_tweets = users.map(user => {
-        return {
-            key: user.key,
-            tweets: this.getTweets(user)
-        }
-    })
-    console.log("User Tweet Data")
-    console.log(user_tweets)*/
-
     let getAllTweetsPromiseArray = [];
     let tweetsFromAllAccounts = [];
-
     users.map((user) => {
-        getAllTweetsPromiseArray.push(this.getTweets(user))
+        getAllTweetsPromiseArray.push(getTweets(user))
     })
-
     Promise.all(getAllTweetsPromiseArray)
         .then((results) => {
             results.map((result, index) => {
+                let reducedTwitterData = getReducedTweets(result)
                 tweetsFromAllAccounts = [...tweetsFromAllAccounts, {
                     key: users[index].key,
-                    tweets: getReducedTweets(result)
+                    tweets: reducedTwitterData
                 }]
+                users[index].last_tweet_id = getLastTweetId(reducedTwitterData)               
             })
             console.log("tweets")
             console.log(tweetsFromAllAccounts)
+            res.write(JSON.stringify(tweetsFromAllAccounts))
+            res.end()
         })
-    /*res.write(JSON.stringify(tweets))
-    res.writeHead(200, {
+    /*res.writeHead(200, {
         'Content-Type': 'application/json',
         'Allow': 'OPTIONS,POST,GET,HEAD,DELETE',
         'Access-Control-Allow-Origin': req.headers.origin,
         'Access-Control-Allow-Methods': '*',
         'Access-Control-Allow-Headers': '*'
-    })
-    res.end()*/
+    })*/
 }
 
-module.exports.getTweets = (user) => {
-    console.log("geting tweets");
+function getTweets(user) {
+    const request = getRequestObject(user)
+    console.log(request);
+    console.log(user)
     accessToken = user.accessToken
     console.log(user)
     secret = user.secret
@@ -60,11 +54,20 @@ module.exports.getTweets = (user) => {
     return getTweetsRequest;
 }
 
+function getRequestObject(user) {
+
+    let requestObject = {} 
+    requestObject.method = requestMethod
+    requestObject.url = requestUrl 
+    if(user.hasOwnProperty('last_tweet_id')) {
+        requestObject.url = `${requestUrl}&since_id=${user.last_tweet_id.toString()}` 
+    } 
+    return requestObject 
+}
+
 function getReducedTweets(result) {
     let reducedTwitterData = [];
     result.data.map((tweetData) => {
-        let tweet_id = BigInt(tweetData.id);
-        last_tweet_id = (tweet_id > last_tweet_id ? tweet_id : last_tweet_id);
         reducedTwitterData = [...reducedTwitterData, {
             text: tweetData.full_text,
             id: tweetData.id,
@@ -79,6 +82,15 @@ function getReducedTweets(result) {
         }]
     })
     return reducedTwitterData
+}
+
+function getLastTweetId(reducedTwitterData) {
+    //Init last_tweet_id with first tweet id in reducedTwitterData array
+    let last_tweet_id = BigInt(reducedTwitterData[0].id); 
+    reducedTwitterData.map((tweet)=>{
+        last_tweet_id = (tweet.id > last_tweet_id ? tweet.id : last_tweet_id);
+    })
+    return last_tweet_id
 }
 /*module.exports.getTweets = (user) => {
     console.log("getting tweets")
