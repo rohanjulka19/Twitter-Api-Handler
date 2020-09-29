@@ -24,7 +24,7 @@ module.exports.getDateTime = (date_time) => {
 
 // Find a better place for them 
 
-let users = [{
+/*let users = [{
     key: '2447266872-YfLJt8Uc222aKr1UHe6AIepBbJiAtL63C4nV0by',
     secret: 'byWNd6CQZEIIfNlN1ktb1wGuWQOwJQqlfgHFjZ9qRlexu'
 },
@@ -32,7 +32,9 @@ let users = [{
     key: '1310590545362694144-xw608j935p8GyPGbyzv8cmwQ5g5kmh',
     secret: 'ryLSiYAkLLWDQZbiJs4Ma32xv1cSKkQjc8gTEgCJVpdBB'
 }
-]
+]*/
+
+users = [] 
 
 module.exports.port = 8000;
 module.exports.host = "localhost"

@@ -13,8 +13,12 @@ module.exports.addUser = (req,res) => {
     })   
     req.on('end', () => {
         const user_data = JSON.parse(buffer)
-        users.push(user_data)
-        handleOptions(req,res)
+        if(!users.some(user => user_data.key === user.key )) {
+            users.push(user_data)
+        }
+        console.log(users)
+        res.end()
+        //handleOptions(req,res) 
     })
 }
 

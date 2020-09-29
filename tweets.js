@@ -24,17 +24,28 @@ module.exports.getTweetsFromAllAccounts = (req, res) => {
             })
             console.log("tweets")
             console.log(tweetsFromAllAccounts)
+            res.writeHead(200, { 
+                /*  We can only call writeHead one time. 
+                    So in get Tweets api we have to set content type 
+                    To JSON soth at the browser parses it in JSON format */
+                'Content-Type': 'application/json',
+                'Allow': 'OPTIONS,POST,GET,HEAD,DELETE',
+                'Access-Control-Allow-Origin': req.headers.origin,
+                'Access-Control-Allow-Methods': '*',
+                'Access-Control-Allow-Headers': '*'
+            })
+            //    res.writeHead(200,{'Content-Type':'application/json'})
             res.write(JSON.stringify(tweetsFromAllAccounts))
-            handleOptions();
+            res.end()
+            //handleOptions(req, res);
         })
 }
 
-function getTweets(user) {
+function getTweets(user) { 
     const request = getRequestObject(user)
     console.log(request);
     console.log(user)
     accessToken = user.accessToken
-    console.log(user)
     secret = user.secret
     let getTweetsRequest = axios.get(request.url, {
         headers: oauth.toHeader(oauth.authorize(request, user)),
@@ -95,14 +106,14 @@ oauth = OAuth({
 
 
 /*{
-                text: "To make room for more expression we will now count all emojis as equal—including those with gender‍‍‍ and skin t… https://t.co/MkGjXf9aXm",
-                id: "1050118621198921728",
-                created_at: this.getDateTime("Wed Oct 10 20:19:24 +0000 2018"),
-                user: {
-                    name: "Twitter API",
-                    screen_name: "TwitterAPI",
-                    url: "https://t.co/8IkCzCDr19",
-                    profile_image: "https://pbs.twimg.com/profile_images/942858479592554497/BbazLO9L_normal.jpg",
-                    verified: true,
-                }
-            }*/
+    text: "To make room for more expression we will now count all emojis as equal—including those with gender‍‍‍ and skin t… https://t.co/MkGjXf9aXm",
+    id: "1050118621198921728",
+    created_at: this.getDateTime("Wed Oct 10 20:19:24 +0000 2018"),
+    user: {
+        name: "Twitter API",
+        screen_name: "TwitterAPI",
+        url: "https://t.co/8IkCzCDr19",
+        profile_image: "https://pbs.twimg.com/profile_images/942858479592554497/BbazLO9L_normal.jpg",
+        verified: true,
+    }
+}*/
